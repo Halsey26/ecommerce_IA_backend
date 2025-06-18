@@ -12,5 +12,4 @@ class Log(BaseModel):
 @router.post("/logs/")
 async def receive_log(log: Log):
     print(f"📨 Log recibido: {log}")
-    # Aquí podrías guardarlo en PostgreSQL más adelante
     return {"status": "ok", "log": log}
