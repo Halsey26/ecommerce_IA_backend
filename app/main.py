@@ -1,5 +1,8 @@
-from app.db.database import init_db
-init_db()
+from dotenv import load_dotenv
+load_dotenv()
+
+import os
+db_url = os.getenv("DATABASE_URL")
 
 from fastapi import FastAPI
 from app.api.endpoints import router
