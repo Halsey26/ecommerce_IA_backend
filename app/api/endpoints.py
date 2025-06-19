@@ -1,34 +1,14 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 from pydantic import BaseModel
-from datetime import datetime
+from app.chatbot_modulo.chat_logic import generate_response  # usa tu función real
 
 router = APIRouter()
 
-class Log(BaseModel):
-    user_id: str
-    message: str
-
-from typing import Optional
-
-timestamp: Optional[str] = None
-
-
-@router.post("/logs/")
-async def receive_log(log: Log):
-    log.timestamp = log.timestamp or datetime.utcnow().isoformat()
-    print(f"📨 Log recibido: {log}")
-    return {"status": "ok", "log": log}
-
-
-
-class ChatRequest(BaseModel):
+class ChatInput(BaseModel):
     message: str
 
 @router.post("/chat/")
-async def chat_endpoint(req: ChatRequest):
-    user_msg = req.message
-
-    # Aquí va tu lógica IA para procesar user_msg y generar respuesta
-    response = f"Echo: {user_msg}"
-
+async def chat_endpoint(input: ChatInput):
+    response = generate_response(input.message)
     return {"response": response}
+
