@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
 from datetime import datetime
-from app.db.database import SessionLocal
-from app.db.models import ChatLog
 from app.chatbot_modulo.chat_logic import generate_response
+
+from app.services.supabase_client import supabase
+
 
 router = APIRouter()
 
@@ -12,24 +12,48 @@ class Message(BaseModel):
     user_id: str
     message: str
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# "Base de datos" temporal simulada en memoria (solo durante ejecución)
+logs_simulados = []
+
+@router.get("/usuarios/")
+def obtener_usuarios():
+    response = supabase.table("users").select("*").execute()
+    return response.data
 
 @router.post("/chat/")
-async def chat_handler(msg: Message, db: Session = Depends(get_db)):
+async def chat_handler(msg: Message):
     response = generate_response(msg.message)
 
-    log = ChatLog(
-        user_id=msg.user_id,
-        user_input=msg.message,
-        bot_response=response,
-        timestamp=datetime.utcnow()
-    )
-    db.add(log)
-    db.commit()
+    log = {
+        "user_id": msg.user_id,
+        "user_input": msg.message,
+        "bot_response": response,
+        "timestamp": datetime.utcnow().isoformat()
+    }
 
-    return {"response": response}
+    # Guardamos el log solo en memoria para mostrarlo por UI si se desea
+    logs_simulados.append(log)
+
+    return {"response": response, "log": log}
+
+@router.get("/logs/")
+def get_logs():
+    return {"logs": logs_simulados}
+
+@router.get("/modelo/segmentacion/")
+def modelo_segmentacion():
+    return {
+        "modelo": "kmeans-clientes",
+        "estado": "cargado (simulado)",
+        "segmentos": ["frecuente", "nuevo", "riesgo_abandono"]
+    }
+
+@router.get("/modelo/prediccion/")
+def modelo_prediccion():
+    return {
+        "modelo": "flan-t5-mini",
+        "estado": "cargado (simulado)",
+        "respuesta": "Este cliente probablemente compre en las próximas 24 horas"
+    }
+
+

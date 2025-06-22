@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel del Agente IA eCommerce</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1, h2 {
+      color: #333;
+    }
+
+    iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      overflow-y: auto;
+      max-height: 400px;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+  <h1>💬 Chatbot IA + Métricas en Tiempo Real</h1>
+
+  <iframe src="http://localhost:3000/chat"></iframe>
+
+  <div class="container">
+    <div class="card" id="logs-card">
+      <h2>📝 Logs de Conversación</h2>
+      <pre id="logs">Cargando...</pre>
+    </div>
+    <div class="card">
+      <h2>📊 Métricas del Modelo</h2>
+      <strong>Segmentación:</strong>
+      <pre id="segmentacion">Cargando...</pre>
+      <strong>Predicción:</strong>
+      <pre id="prediccion">Cargando...</pre>
+    </div>
+  </div>
+
+  <footer>
+    Proyecto IA eCommerce · FastAPI + Next.js
+  </footer>
+
+  <script>
+    async function cargarDatos() {
+      try {
+        const logs = await fetch("/logs/");
+        const logsData = await logs.json();
+        document.getElementById("logs").textContent = JSON.stringify(logsData.logs, null, 2);
+
+        const seg = await fetch("/modelo/segmentacion/");
+        const segData = await seg.json();
+        document.getElementById("segmentacion").textContent = JSON.stringify(segData, null, 2);
+
+        const pred = await fetch("/modelo/prediccion/");
+        const predData = await pred.json();
+        document.getElementById("prediccion").textContent = JSON.stringify(predData, null, 2);
+
+      } catch (error) {
+        document.getElementById("logs").textContent = "Error cargando datos.";
+        console.error("Error:", error);
+      }
+    }
+
+    cargarDatos();
+    setInterval(cargarDatos, 5000); // actualiza cada 5 segundos
+  </script>
+</body>
+</html>
