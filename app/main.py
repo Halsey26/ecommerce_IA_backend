@@ -1,16 +1,18 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from app.api import endpoints
 
-
 app = FastAPI()
 
 # CORS (para permitir Next.js desde otro puerto)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # en producción, reemplaza por origen real
+    allow_origins=["http://localhost:3000"],  # en producción, reemplaza por origen real
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,5 +33,6 @@ async def render_panel(request: Request):
 
 # Incluir todas las rutas del router
 app.include_router(endpoints.router)
+
 
 

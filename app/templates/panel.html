@@ -77,7 +77,7 @@
   <script>
     async function cargarDatos() {
       try {
-        const logs = await fetch("/logs/");
+        const logs = await fetch("/logs-supabase/");
         const logsData = await logs.json();
         document.getElementById("logs").textContent = JSON.stringify(logsData.logs, null, 2);
 

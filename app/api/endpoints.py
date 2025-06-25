@@ -1,59 +1,42 @@
-from fastapi import APIRouter
-from pydantic import BaseModel
-from datetime import datetime
-from app.chatbot_modulo.chat_logic import generate_response
+from fastapi import APIRouter, HTTPException
+import logging
 
-from app.services.supabase_client import supabase
-
-
-router = APIRouter()
-
-class Message(BaseModel):
-    user_id: str
-    message: str
-
-# "Base de datos" temporal simulada en memoria (solo durante ejecución)
-logs_simulados = []
-
-@router.get("/usuarios/")
-def obtener_usuarios():
-    response = supabase.table("users").select("*").execute()
-    return response.data
+# Inicializa logs
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 @router.post("/chat/")
-async def chat_handler(msg: Message):
-    response = generate_response(msg.message)
+async def chat_endpoint(data: ChatInput):
+    id_conversacion = str(uuid.uuid4())
 
-    log = {
-        "user_id": msg.user_id,
-        "user_input": msg.message,
-        "bot_response": response,
-        "timestamp": datetime.utcnow().isoformat()
-    }
+    try:
+        supabase.table("logs_chat").insert({
+            "id_conversacion": id_conversacion,
+            "id_usuario": data.user_id,
+            "rol": "user",  # 👈 asegúrate que coincida con el CHECK
+            "mensaje": data.message,
+            "fecha": datetime.utcnow().isoformat()
+        }).execute()
+    except Exception as e:
+        logger.error(f"Error guardando mensaje del usuario en Supabase: {e}")
+        raise HTTPException(status_code=500, detail="Error al guardar mensaje del usuario.")
 
-    # Guardamos el log solo en memoria para mostrarlo por UI si se desea
-    logs_simulados.append(log)
+    try:
+        respuesta = obtener_respuesta(data.message)
+    except Exception as e:
+        logger.error(f"Error generando respuesta del bot: {e}")
+        raise HTTPException(status_code=500, detail="Error al generar respuesta del bot.")
 
-    return {"response": response, "log": log}
+    try:
+        supabase.table("logs_chat").insert({
+            "id_conversacion": id_conversacion,
+            "id_usuario": data.user_id,
+            "rol": "bot",
+            "mensaje": respuesta,
+            "fecha": datetime.utcnow().isoformat()
+        }).execute()
+    except Exception as e:
+        logger.error(f"Error guardando respuesta del bot en Supabase: {e}")
+        raise HTTPException(status_code=500, detail="Error al guardar respuesta del bot.")
 
-@router.get("/logs/")
-def get_logs():
-    return {"logs": logs_simulados}
-
-@router.get("/modelo/segmentacion/")
-def modelo_segmentacion():
-    return {
-        "modelo": "kmeans-clientes",
-        "estado": "cargado (simulado)",
-        "segmentos": ["frecuente", "nuevo", "riesgo_abandono"]
-    }
-
-@router.get("/modelo/prediccion/")
-def modelo_prediccion():
-    return {
-        "modelo": "flan-t5-mini",
-        "estado": "cargado (simulado)",
-        "respuesta": "Este cliente probablemente compre en las próximas 24 horas"
-    }
-
-
+    return {"response": respuesta}
