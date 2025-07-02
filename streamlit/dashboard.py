@@ -6,9 +6,13 @@ import os
 import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
+from supabase import create_client, Client
+
 
 # Cargar modelo
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+# BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
 scaler = joblib.load(os.path.join(BASE_DIR, 'app/models/scaler.pkl'))
 kmeans = joblib.load(os.path.join(BASE_DIR, 'app/models/kmeans_model.pkl'))
 
@@ -24,14 +28,44 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 DB_URL = os.getenv("DATABASE_URL")
-engine = create_engine(DB_URL)
 
-@st.cache_data(ttl=600)
-def load_data():
-    query = "SELECT * FROM session_summary"
-    return pd.read_sql(query, engine)
+supabase_url = os.getenv('SUPABASE_URL')
+supabase_apikey=os.getenv('SUPABASE_SERVICE_ROLE_KEY')
 
-df = load_data()
+def connexion_supabase(url, apikey):
+    cliente_supa= create_client(url, apikey)
+    response= ( 
+        cliente_supa.table("session_summary")
+        .select("*")
+        .execute()
+    )
+    data= response.data
+    df =pd.DataFrame(data)
+    return df
+
+
+df= connexion_supabase(supabase_url,supabase_apikey)
+
+
+# print(data_df)
+# print(DB_URL)
+# engine = create_engine(DB_URL)
+
+
+# @st.cache_data(ttl=600)
+# def load_data():
+#     try:
+#         query = "SELECT * FROM session_summary"
+#         with engine.connect() as conn:
+#             df = pd.read_sql(query, conn)
+#             print("✅ Datos cargados correctamente.")
+#             return df
+#     except Exception as e:
+#         print(f"❌ Error al cargar datos: {e}")
+#         return pd.DataFrame()
+
+
+# df = load_data()
 
 # 📌 Sección 1: KPIs
 if menu == "KPIs":
@@ -51,6 +85,10 @@ elif menu == "Conversaciones por día":
         ax.set_title("Conversaciones por día")
         ax.set_xlabel("Fecha")
         ax.set_ylabel("Cantidad de conversaciones")
+        y_min = 0
+        y_max = conversaciones_por_dia.max() * 1.1  # 10% más
+        ax.set_ylim(y_min, y_max)        
+
         st.pyplot(fig)
     else:
         st.warning("No se encontró la columna 'fecha'.")
