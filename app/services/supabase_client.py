@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 import os
 from supabase import create_client
 
-# 👇 Carga explícita desde el path relativo
+#  Carga explícita desde el path relativo
 dotenv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '..', '.env')
 load_dotenv(dotenv_path)
 
