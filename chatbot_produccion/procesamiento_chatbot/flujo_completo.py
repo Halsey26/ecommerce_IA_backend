@@ -1,9 +1,9 @@
 # chatbot_produccion/flujo_completo.py
 
-from procesamiento.cargar_datos import cargar_json
-from procesamiento.features_chat import generar_features_basicos
-from procesamiento.nlp_extractor import extraer_keywords
-from procesamiento.clustering import aplicar_clustering
+from procesamiento_chatbot.cargar_datos import cargar_json
+from procesamiento_chatbot.features_chat import generar_features_basicos
+from procesamiento_chatbot.nlp_extractor import extraer_keywords
+from procesamiento_chatbot.clustering import aplicar_clustering
 
 def main():
     print("🚀 Cargando datos...")
