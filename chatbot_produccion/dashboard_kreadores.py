@@ -42,13 +42,19 @@ def get_img_with_href(local_img_path, target_url):
     """
     Crea un tag HTML para una imagen con enlace
     """
-    img_format = os.path.splitext(local_img_path)[-1].replace('.', '')
-    bin_str = get_base64_of_bin_file(local_img_path)
-    html_code = f'''
-        <a href="{target_url}" target="_blank">
-            <img src="data:image/{img_format};base64,{bin_str}" style="max-height: 80px;"/>
-        </a>'''
-    return html_code
+    try:
+        img_format = os.path.splitext(local_img_path)[-1].replace('.', '')
+        bin_str = get_base64_of_bin_file(local_img_path)
+        if bin_str is None:
+            return f'<div style="text-align: center; color: {PRIMARY_COLOR}; font-size: 2rem;">📷</div>'
+        html_code = f'''
+            <a href="{target_url}" target="_blank">
+                <img src="data:image/{img_format};base64,{bin_str}" style="max-height: 80px;"/>
+            </a>'''
+        return html_code
+    except Exception as e:
+        print(f"Error al crear HTML para imagen: {e}")
+    return f'<div style="text-align: center; color: {PRIMARY_COLOR}; font-size: 2rem;">📷</div>'
 
 # --- Importar modelos unificados ---
 # (Aquí van todas las funciones de modelos que proporcioné anteriormente)
@@ -139,7 +145,7 @@ def run_sentimiento(supabase):
         return pd.DataFrame()
 
 def run_recompra(supabase):
-    """Modelo de análisis de recompra"""
+    """Modelo de análisis de recompra mejorado"""
     try:
         # Traer datos de Supabase
         data = supabase.table("message_metadata").select(
@@ -148,8 +154,16 @@ def run_recompra(supabase):
         
         df = pd.DataFrame(data.data)
         if df.empty:
+            print("No hay datos en message_metadata para análisis de recompra")
             return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
+        # Verificar y limpiar la columna hizo_compra
+        print(f"Valores únicos en hizo_compra: {df['hizo_compra'].unique()}")
+        
+        # Convertir a booleano si es necesario
+        if df['hizo_compra'].dtype == 'object':
+            df['hizo_compra'] = df['hizo_compra'].apply(lambda x: True if str(x).lower() in ['true', '1', 'yes', 'sí'] else False)
+        
         # Número de compras por cliente
         compras = df.groupby("cliente_id")["hizo_compra"].sum().reset_index()
         compras["recompra"] = compras["hizo_compra"].apply(lambda x: 1 if x >= 2 else 0)
@@ -165,12 +179,18 @@ def run_recompra(supabase):
         recompra_count = compras.groupby("recompra")["cliente_id"].count().reset_index(name="clientes")
         recompra_count["recompra"] = recompra_count["recompra"].map({0: "No", 1: "Sí"})
 
+        print(f"Probabilidad de recompra: {prob_recompra}")
+        print(f"Compras count: {compras_count}")
+        print(f"Recompra count: {recompra_count}")
+        
         return result, compras_count, recompra_count
         
     except Exception as e:
         print(f"Error en modelo de recompra: {e}")
+        import traceback
+        traceback.print_exc()
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-
+    
 # Diccionario para facilitar el acceso a los modelos
 modelos = {
     "churn": run_churn,
@@ -395,10 +415,14 @@ def verificar_datos():
         tiene_mensajes = len(response_messages.data) > 0
         tiene_metadatos = len(response_metadata.data) > 0
         
+        # Mostrar información de diagnóstico en el sidebar
+        st.sidebar.info(f"Mensajes encontrados: {len(response_messages.data)}")
+        st.sidebar.info(f"Metadatos encontrados: {len(response_metadata.data)}")
+        
         return tiene_mensajes, tiene_metadatos
         
     except Exception as e:
-        print(f"Error verificando datos: {e}")
+        st.sidebar.error(f"Error verificando datos: {e}")
         return False, False
 
 def actualizar_datos_periodicamente():
@@ -412,13 +436,29 @@ def actualizar_datos_periodicamente():
 
 # --- Header de Kreadores con logo ---
 def kreadores_header():
-    # Intenta cargar el logo, si no existe muestra el texto
-    logo_path = "assets/logo_kreadores.png"
+    # Rutas alternativas para el logo
+    logo_paths = [
+        "assets/logo_kreadores.png",
+        "assets/logo.png", 
+        "assets/kreadores_logo.png",
+        "../assets/logo_kreadores.png",
+        "logo_kreadores.png"
+    ]
     
-    if os.path.exists(logo_path):
-        logo_html = get_img_with_href(logo_path, "https://www.kreadores.pro")
-    else:
-        logo_html = '<div class="camera-icon">📷</div>'
+    logo_html = None
+    for logo_path in logo_paths:
+        if os.path.exists(logo_path):
+            try:
+                logo_html = get_img_with_href(logo_path, "https://www.kreadores.pro")
+                break
+            except Exception as e:
+                print(f"Error al cargar el logo en {logo_path}: {e}")
+                continue
+    
+    # Si no se encuentra ningún logo, usar un emoji
+    if logo_html is None:
+        logo_html = '<div style="text-align: center; color: #667eea; font-size: 3rem; margin-bottom: 1rem;">📷</div>'
+        print("Logo no encontrado en las rutas especificadas. Usando emoji alternativo.")
     
     st.markdown(f"""
     <div class="main-header">
@@ -1248,6 +1288,17 @@ def kreadores_recompra_page():
     kreadores_header()
     st.title("📊 Propensión de Recompra - Clientes Recurrentes")
     
+    # Añadir botón para mostrar datos crudos
+    if st.button("Mostrar datos crudos para diagnóstico"):
+        try:
+            data = supabase.table("message_metadata").select("cliente_id, hizo_compra, valor_compra").limit(10).execute()
+            df = pd.DataFrame(data.data)
+            st.write("Muestra de datos crudos:")
+            st.dataframe(df)
+            st.write(f"Valores únicos en 'hizo_compra': {df['hizo_compra'].unique()}")
+        except Exception as e:
+            st.error(f"Error al obtener datos: {e}")
+    
     try:
         result, compras_count, recompra_count = modelos["recompra"](supabase)
         
@@ -1257,15 +1308,17 @@ def kreadores_recompra_page():
         
         # Métricas Recompra
         prob_recompra = result.iloc[0]['probabilidad_recompra'] * 100
-        clientes_recompra = recompra_count[recompra_count['recompra'] == 1]['clientes'].sum()
-        total_clientes = recompra_count['clientes'].sum()
+        clientes_recompra = recompra_count[recompra_count['recompra'] == 'Sí']['clientes'].sum() if not recompra_count.empty else 0
+        total_clientes = recompra_count['clientes'].sum() if not recompra_count.empty else 0
         
         metrics = [
             ("Prob. Recompra", f"{prob_recompra:.1f}%", PRIMARY_COLOR),
             ("Clientes Recurrentes", f"{clientes_recompra}", SUCCESS_COLOR),
-            ("% Lealtad", f"{(clientes_recompra/total_clientes)*100:.1f}%", WARNING_COLOR if (clientes_recompra/total_clientes)*100 < 30 else SUCCESS_COLOR)
+            ("% Lealtad", f"{(clientes_recompra/total_clientes)*100:.1f}%" if total_clientes > 0 else "0%", WARNING_COLOR)
         ]
         display_metrics(metrics)
+        
+        # Resto del código de la página de recompra...
         
         # Gráfico principal simplificado
         col1, col2 = st.columns(2)
@@ -1413,9 +1466,9 @@ try:
 except:
     st.sidebar.info("ℹ️ Mensajes disponibles")
 
-# --- Pie de página ---
+## --- Pie de página ---
 st.sidebar.markdown("---")
-st.sidebar.info(f"""
+st.sidebar.markdown(f"""
 **Kreadores Analytics Dashboard**  
 v2.1 · Actualizado: {pd.Timestamp.now().strftime("%Y-%m-%d")}  
 Especializado en equipos fotográficos  
