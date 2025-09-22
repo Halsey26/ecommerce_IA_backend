@@ -1161,3 +1161,11 @@ st.sidebar.markdown("""
     </a>
 </div>
 """, unsafe_allow_html=True)
+
+st.sidebar.markdown("""
+<div style="text-align: center; margin-top: 20px;">
+    <a href="https://streamlit-kreadores-dashboard.onrender.com/" target="_blank" style="color: #667eea; text-decoration: none;">
+        📊 Analytics Dashboard - Kreadores
+    </a>
+</div>
+""", unsafe_allow_html=True)
