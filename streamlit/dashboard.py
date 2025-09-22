@@ -5,6 +5,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 from dotenv import load_dotenv
 from supabase import create_client, Client
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../chatbot_produccion")))
+
 from modelos import rfm, churn, sentimiento, recompra
 
 # --- Cargar .env ---

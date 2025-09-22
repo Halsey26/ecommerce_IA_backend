@@ -5,6 +5,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 from dotenv import load_dotenv
 from supabase import create_client, Client
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../chatbot_produccion")))
+
 from modelos import rfm, churn, sentimiento, recompra
 import numpy as np
 from datetime import datetime, timedelta
@@ -56,11 +59,19 @@ st.markdown("""
     }
     
     .tagline {
-        font-size: 1.2rem;
+        font-size: 1.5rem;
         opacity: 0.9;
-        font-weight: 300;
+        font-weight: 350;
+        display: block;
+        margin-top: 0; 
     }
-    
+   .subtagline {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-weight: 250;
+        display: block;
+        margin-top: 0; 
+    }
     .metric-card {
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         border-radius: 15px;
@@ -193,12 +204,21 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Header de Kreadores ---
+# def kreadores_header():
+#     st.markdown("""
+#     <div class="main-header">
+#         <div class="camera-icon">📷</div>
+#         <div class="kreadores-logo">KREADORES PRO</div>
+#         <div class="tagline">Analytics Dashboard - La Tienda #1 para Crear Contenido Creativo y Profesional</div>
+#     </div>
+#     """, unsafe_allow_html=True)
 def kreadores_header():
     st.markdown("""
     <div class="main-header">
         <div class="camera-icon">📷</div>
-        <div class="kreadores-logo">KREADORES</div>
-        <div class="tagline">Analytics Dashboard - La Tienda #1 para Crear Contenido Creativo y Profesional</div>
+        <div class="kreadores-logo">KREADORES PRO</div>
+        <div class="tagline"> Analytics Dashboard – Análisis de Conversaciones y Experiencia del Cliente</div>
+        <div class="subtagline">Insights de RFM, churn, sentimiento y recompra basados en interacciones con el cliente</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1130,7 +1150,7 @@ st.sidebar.markdown("---")
 st.sidebar.info("""
 **Kreadores Analytics Dashboard**  
 v2.1 · Actualizado: {date}  
-Especializado en equipos fotográficos  
+Inspírate, crea y lleva tus ideas al siguiente nivel.
 Powered by Supabase
 """.format(date=pd.Timestamp.now().strftime("%Y-%m-%d")))
 

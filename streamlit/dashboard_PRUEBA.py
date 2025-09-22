@@ -29,6 +29,7 @@ st.title("📊 Dashboard Ecommerce - Modelos de Clientes")
 opcion = st.sidebar.radio(
     "Selecciona el análisis:",
     ["RFM", "Churn", "Sentimiento", "Propensión de Recompra"]
+    # ["RFM"]
 )
 
 def plot_df(df, x=None, y=None, kind="bar", title=""):
@@ -49,6 +50,9 @@ def plot_df(df, x=None, y=None, kind="bar", title=""):
 
 try:
     if opcion=="RFM":
+
+        # df= rfm.run(supabase)
+        # st.write("Data Supabase:", df.head())
         df_rfm, rfm_summary = rfm.run(supabase)
 
         st.subheader("Resumen por Segmento RFM")

@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def run(supabase):
     # Traer datos de Supabase
     data = supabase.table("message_metadata").select(
@@ -7,6 +8,9 @@ def run(supabase):
     ).execute()
 
     df = pd.DataFrame(data.data)
+
+    # return df
+
     if df.empty:
         return pd.DataFrame(), pd.DataFrame()
 
