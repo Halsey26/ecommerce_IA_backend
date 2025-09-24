@@ -479,7 +479,7 @@ def kreadores_header():
             Análisis de Conversaciones y Fidelización de Clientes
         </p>
         <p style="font-size: 1.2rem; margin: 0; font-weight: 300;">
-            Analytics Dashboard - La Tienda #1 para Crear Contenido Creativo y Profesional
+            Customer Experience Analytics - La Tienda #1 para Crear Contenido Creativo y Profesional
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -1525,7 +1525,7 @@ if "data_updater" not in st.session_state:
 
 # Navegación con colores de Kreadores
 page = st.sidebar.radio(
-    "🎯 Seleccionar vista:",
+    "🎯 SELECCIONA:",
     ("Dashboard Global", "Marketing Intelligence", "RFM", "Churn", "Sentimiento", "Recompra"),
     index=0
 )
@@ -1565,8 +1565,8 @@ except:
 
 st.sidebar.markdown("---")
 st.sidebar.markdown(f"""
-¿Quieres revisar KPIs de la empresa?
-    <a href="https://streamlit-kreadores-dashboard.onrender.com/" target="_blank" style="color: {PRIMARY_COLOR}; text-decoration: none; font-weight: bold;">
+**¿Quieres revisar el desempeño empresarial de Kreadores?** <br>
+   Visita: <a href="https://streamlit-kreadores-dashboard.onrender.com/" target="_blank" style="color: {PRIMARY_COLOR}; text-decoration: none; font-weight: bold;">
         Kreadores Business Analytics
     </a>
 """, unsafe_allow_html=True)
