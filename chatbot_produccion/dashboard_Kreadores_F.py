@@ -1563,14 +1563,23 @@ try:
 except:
     st.sidebar.info("ℹ️ Mensajes disponibles")
 
+st.sidebar.markdown("---")
+st.sidebar.markdown(f"""
+¿Quieres revisar KPIs de la empresa?
+    <a href="https://streamlit-kreadores-dashboard.onrender.com/" target="_blank" style="color: {PRIMARY_COLOR}; text-decoration: none; font-weight: bold;">
+        Kreadores Business Analytics
+    </a>
+""", unsafe_allow_html=True)
+
 ## --- Pie de página ---
 st.sidebar.markdown("---")
 st.sidebar.markdown(f"""
-**Kreadores Analytics Dashboard**  
-v2.1 · Actualizado: {pd.Timestamp.now().strftime("%Y-%m-%d")}  
-Especializado en equipos fotográficos  
-<span style="color: {PRIMARY_COLOR};">Powered by Supabase</span>
+**Kreadores Analytics - v2.2**  
+Actualizado: {pd.Timestamp.now().strftime("%Y-%m-%d")}   
+<span style="color: {PRIMARY_COLOR};">Powered by Streamlit + Supabase</span> <br>
+© 2025
 """, unsafe_allow_html=True)
+
 
 st.sidebar.markdown(f"""
 <div style="text-align: center; margin-top: 20px;">
