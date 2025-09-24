@@ -48,7 +48,7 @@ def get_img_with_href(local_img_path, target_url):
         img_format = os.path.splitext(local_img_path)[-1].replace('.', '')
         bin_str = get_base64_of_bin_file(local_img_path)
         if bin_str is None:
-            return f'<div style="text-align: center; color: {PRIMARY_COLOR}; font-size: 2rem;">📷</div>'
+            return f'<div style="text-align: center; color:  "#667eea"; font-size: 2rem;">📷</div>'
         html_code = f'''
             <a href="{target_url}" target="_blank">
                 <img src="data:image/{img_format};base64,{bin_str}" style="max-height: 80px;"/>
@@ -56,7 +56,7 @@ def get_img_with_href(local_img_path, target_url):
         return html_code
     except Exception as e:
         print(f"Error al crear HTML para imagen: {e}")
-    return f'<div style="text-align: center; color: {PRIMARY_COLOR}; font-size: 2rem;">📷</div>'
+    return f'<div style="text-align: center; color: "#667eea"; font-size: 2rem;">📷</div>'
 
 # --- Importar modelos unificados ---
 # (Aquí van todas las funciones de modelos que proporcioné anteriormente)
@@ -203,7 +203,7 @@ modelos = {
 
 # --- Configuración de la página ---
 st.set_page_config(
-    page_title="Kreadores Analytics Dashboard",
+    page_title="Customer Experience Analytics - Kreadores PRO",
     layout="wide",
     initial_sidebar_state="expanded",
     page_icon="📷"
